@@ -43,6 +43,7 @@
 			on:click={() => handle_selection(i, emoji)}
 			selected={a === i || b === i}
 			found={found.includes(emoji)}
+			group={grid.indexOf(emoji) === i ? 'a' : 'b'}
 		/>
 	{/each}
 </div>
@@ -50,10 +51,12 @@
 <style>
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		grid-template-rows: repeat(4, 1fr);
+		grid-template-columns: repeat(var(--size), 1fr);
+		grid-template-rows: repeat(var(--size), 1fr);
 		height: 100%;
 
 		gap: 0.5rem;
+
+		perspective: 100vw;
 	}
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { shuffle } from '../utils';
 	import Countdown from './Countdown.svelte';
 	import Found from './Found.svelte';
@@ -7,14 +7,29 @@
 	import { levels } from './levels';
 	import type { Level } from './levels';
 
-	const level = levels[0];
+	const dispatch = createEventDispatcher();
 
-	let size: number = level.size;
-	let grid: string[] = create_grid(level);
+	let size: number;
+	let grid: string[] = [];
 	let found: string[] = [];
-	let remaining = level.duration;
-	let duration = level.duration;
+	let remaining: number = 0;
+	let duration: number = 0;
 	let playing = false;
+
+	export function start(level: Level) {
+		size = level.size;
+		grid = create_grid(level);
+		remaining = level.duration;
+		duration = level.duration;
+
+		resume();
+	}
+
+	function resume() {
+		playing = true;
+		countdown();
+		dispatch('play');
+	}
 
 	function create_grid(level: Level) {
 		const copy = level.emojis.slice();
@@ -35,6 +50,10 @@
 
 	function handle_found(e: CustomEvent<{ emoji: string }>) {
 		found = [...found, e.detail.emoji];
+
+		if (found.length === (size * size) / 2) {
+			dispatch('win');
+		}
 	}
 
 	function countdown() {
@@ -42,26 +61,33 @@
 		let remaining_at_start = remaining;
 
 		function loop() {
-			if (playing) return;
+			if (!playing) return;
 			requestAnimationFrame(loop);
 
 			remaining = remaining_at_start - (Date.now() - start);
 
 			if (remaining <= 0) {
-				// TODO: Game over
+				dispatch('lose');
 				playing = false;
 			}
 		}
 
 		loop();
 	}
-
-	onMount(countdown);
 </script>
 
-<div class="game">
+<div class="game" style="--size: {size}">
 	<div class="info">
-		<Countdown {remaining} duration={level.duration} />
+		{#if playing}
+			<Countdown
+				{remaining}
+				{duration}
+				on:click={() => {
+					playing = false;
+					dispatch('pause');
+				}}
+			/>
+		{/if}
 	</div>
 
 	<div class="grid-container">

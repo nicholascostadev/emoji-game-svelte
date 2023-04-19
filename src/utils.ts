@@ -10,3 +10,9 @@ export function shuffle<T>(arr: T[]) {
 
 	return arr;
 }
+
+export function get_twemoji_url(emoji: string) {
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const code = [...emoji].map(char => char.codePointAt(0)!.toString(16)).join('-')
+	return `/twemoji/${code}.svg`
+}

@@ -1,15 +1,20 @@
 <script lang="ts">
+	import { get_twemoji_url } from '../utils';
+	import { send } from './transitions';
+
 	export let emoji: string;
 
 	export let selected: boolean;
 	export let found: boolean;
+	export let group: 'a' | 'b';
 </script>
 
-<div class="square" class:flipped={selected}>
+<div class="square" class:flipped={selected || found}>
 	<button on:click />
+	<div class="background" />
 
 	{#if !found}
-		<span>{emoji}</span>
+		<img alt={emoji} src={get_twemoji_url(emoji)} out:send={{ key: `${emoji}:${group}` }} />
 	{/if}
 </div>
 
@@ -19,21 +24,48 @@
 		justify-content: center;
 		align-items: center;
 
-		background: yellow;
+		transform-style: preserve-3d;
+		transition: transform 0.4s;
 	}
 
-	.flipped button {
-		background: red;
+	.flipped {
+		background: white;
+		border: 0.2em solid #eee;
+		border-radius: 1em;
+
+		transform: rotateY(180deg);
 	}
 
 	button {
 		position: absolute;
 		width: 100%;
 		height: 100%;
+		backface-visibility: hidden;
+
+		background: #eee;
+		border: 0;
+		border-radius: 1em;
+		font-size: inherit;
 	}
 
-	span {
-		font-size: 5em;
+	.background {
+		position: absolute;
+
+		background-color: white;
+		transform: rotateY(180deg);
+		backface-visibility: hidden;
+		border: 0.5em solid #eee;
+		border-radius: 1em;
+
+		width: 100%;
+		height: 100%;
+	}
+
+	img {
+		width: 6em;
+		height: 6em;
 		pointer-events: none;
+		transform: rotateY(180deg);
+		backface-visibility: hidden;
 	}
 </style>
